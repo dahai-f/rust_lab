@@ -1,4 +1,4 @@
-use std::ops::{Index, IndexMut};
+use std::ops::IndexMut;
 use std::slice::SliceIndex;
 
 /// 获取切片中的某个或某些元素
@@ -32,11 +32,11 @@ mod tests {
     #[test]
     fn it_works() {
         let mut s = [10, 11, 12, 13, 14, 15];
-        // let two = index_mut(&mut s, 2);
-        let two = &mut s[2];
+        let two = index_mut(&mut s, 2);
+        // let two = &mut s[2];
         assert_eq!(two, &mut 12);
-        // let range = index_mut(&mut s, 3..5);
-        let range = &mut s[3..5];
+        let range = index_mut(&mut s, 3..5);
+        // let range = &mut s[3..5];
         assert_eq!(range, &mut [13, 14]);
     }
 }
