@@ -1,4 +1,3 @@
-use std::ops::IndexMut;
 use std::slice::SliceIndex;
 
 /// 获取切片中的某个或某些元素
@@ -24,6 +23,8 @@ pub fn index<T, I: SliceIndex<[T]>>(a: &[T], index: I) -> &I::Output {
 pub fn index_mut<T, I: SliceIndex<[T]>>(a: &mut [T], index: I) -> &mut I::Output {
     &mut a[index]
 }
+
+pub mod thread_pool;
 
 #[cfg(test)]
 mod tests {
