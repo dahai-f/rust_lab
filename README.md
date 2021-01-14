@@ -20,6 +20,7 @@
 - 保证多线程情景下的数据安全
     - Send - 保证线程之间消息传递安全
     - Sync - 保证线程之间共享数据安全
+    - 如何理解 rust 中的 Sync、Send？(https://zhuanlan.zhihu.com/p/64699643)
 - 仍然_**无法**_在编译期检测到死锁
 
 ## 零开销抽象
@@ -57,4 +58,8 @@ C++的实现遵循“零开销原则”：如果你不使用某个抽象，就�
 ## 宏
 
 - 独立的模式解析语法
-- 可编程宏（procedural macro）
+- 可编程宏（Procedural Macro）
+
+## 异步编程
+
+- async/await
