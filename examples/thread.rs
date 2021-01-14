@@ -1,6 +1,6 @@
 #![feature(negative_impls)]
 
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, RwLock};
 use std::thread;
 use std::time::Duration;
 
@@ -20,6 +20,7 @@ fn main() {
     do_f(|| s.value = 100);
     println!("{}", s.value);
 
+    // let rw_s = Arc::new(RwLock::new(s));
     let t1 = thread::spawn(move || {
         println!("{}", s.value);
 
