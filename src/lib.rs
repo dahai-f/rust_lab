@@ -1,6 +1,3 @@
-#[macro_use]
-extern crate tb_ecs_macro;
-
 use std::slice::SliceIndex;
 
 /// 获取切片中的某个或某些元素
@@ -27,7 +24,6 @@ pub fn index_mut<T, I: SliceIndex<[T]>>(a: &mut [T], index: I) -> &mut I::Output
     &mut a[index]
 }
 
-pub mod component;
 pub mod thread_pool;
 
 #[cfg(test)]

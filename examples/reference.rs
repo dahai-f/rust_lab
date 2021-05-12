@@ -5,6 +5,6 @@ fn main() {
     println!("The length of '{}' is {}.", s1, len);
 }
 
-fn calculate_length(s: &str) -> usize {
+fn calculate_length(s: &String) -> usize {
     s.len()
 }

@@ -26,7 +26,7 @@ fn main() {
     };
     println!("{:?}", s.value);
 
-    // let rw_s = Arc::new(RwLock::new(s));
+    // let rw_s = Arc::new(Mutex::new(s));
     let t1 = thread::spawn(move || {
         println!("{:?}", s.value);
 

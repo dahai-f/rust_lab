@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct A {
     a: i32,
 }
@@ -6,7 +6,7 @@ struct A {
 fn main() {
     let a = A { a: 10 };
     {
-        // let aa = a;
+        let aa = a.clone();
     }
     println!("{:?}", a);
 }
