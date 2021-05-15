@@ -229,6 +229,7 @@ dependencies = [
 name = "rust_lab"
 version = "0.1.0"
 dependencies = [
+ "lazy_static",
  "serde",
  "serde_json",
  "serde_traitobject",
