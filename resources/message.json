@@ -1,1 +1,1 @@
-{"s":[["rust_lab::MyStruct",{"bar":1,"foo":"a"}],["rust_lab::MyStruct",{"bar":2,"foo":"b"}],["rust_lab::MyStruct",{"bar":3,"foo":"c"}],["rust_lab::MyStruct",{"bar":4,"foo":"d"}]]}
+{"s":[["serde::MyStruct",{"bar":1,"foo":"a"}],["serde::MyStruct1",{"value":2}],["serde::MyStruct1",{"value":3}],["serde::MyStruct",{"bar":4,"foo":"d"}]]}
