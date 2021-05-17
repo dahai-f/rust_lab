@@ -79,7 +79,7 @@ impl MyTrait for MyStruct1 {
 }
 
 type SerdeKey = u64;
-type DeFn = fn(value: Value) -> Box<dyn Any>;
+type DeFn = fn(value: Value) -> Box<dyn DeTrait>;
 type NameToDe = HashMap<SerdeKey, DeFn>;
 
 lazy_static! {
@@ -124,7 +124,7 @@ impl<'de, T: ?Sized + DeTrait> Deserialize<'de> for SerdeBox<T> {
 
         struct Visitor;
         impl<'de> serde::de::Visitor<'de> for Visitor {
-            type Value = Box<dyn Any>;
+            type Value = Box<dyn DeTrait>;
             fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                 write!(formatter, "a MyTraitBox")
             }
@@ -146,9 +146,11 @@ impl<'de, T: ?Sized + DeTrait> Deserialize<'de> for SerdeBox<T> {
                 Ok(de(t1))
             }
         }
-        deserializer
-            .deserialize_tuple(2, Visitor)
-            .map(|any| SerdeBox::new(<boxed::Box<dyn Any> as Into<Box<T>>>::into(any)))
+        deserializer.deserialize_tuple(2, Visitor).map(|obj| {
+            let any = Box::into_raw(obj);
+            let any = any as *mut T;
+            SerdeBox::new(Box::from_raw())
+        })
     }
 }
 
