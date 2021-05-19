@@ -5,6 +5,7 @@ use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::hash::{Hash, Hasher};
+use std::marker::PhantomData;
 
 use lazy_static::*;
 use serde::de::DeserializeOwned;
@@ -12,41 +13,27 @@ use serde::ser::SerializeTuple;
 use serde::*;
 use serde_json::Value;
 
-trait SerdeKeyTrait {
-    fn serde_key() -> SerdeKey
+trait DeTrait {
+    fn de<T: ?Sized + DeTrait>() -> (&'static str, DeFn<T>)
     where
-        Self: 'static + Sized,
-    {
-        let type_id = std::any::TypeId::of::<Self>();
-        let mut hasher = DefaultHasher::default();
-        type_id.hash(&mut hasher);
-        let type_id = hasher.finish();
-        type_id
-    }
-}
-
-impl<T: 'static + Sized> SerdeKeyTrait for T {}
-
-trait DeTrait: SerdeKeyTrait {
-    fn de() -> (SerdeKey, DeFn)
-    where
-        Self: 'static + Sized,
+        Self: Sized,
         Self: DeserializeOwned,
     {
-        let type_id = Self::serde_key();
-        (type_id, |value| {
-            Box::new(serde_json::from_value::<Self>(value).unwrap())
+        let sized_type = std::any::type_name::<Self>();
+        (sized_type, |value| {
+            let boxed = Box::<Self>::new(serde_json::from_value::<Self>(value).unwrap());
+            SerdeBox(metatype::type_coerce(boxed))
         })
     }
 }
 
-trait SerTrait: SerdeKeyTrait {
-    fn ser(&self) -> (SerdeKey, Value);
+trait SerTrait {
+    fn ser(&self) -> Value;
 }
 
 impl<T: 'static + Serialize + Sized> SerTrait for T {
-    fn ser(&self) -> (u64, Value) {
-        (Self::serde_key(), serde_json::to_value(self).unwrap())
+    fn ser(&self) -> Value {
+        serde_json::to_value(self).unwrap()
     }
 }
 impl<T: 'static + DeserializeOwned + Sized> DeTrait for T {}
@@ -78,29 +65,37 @@ impl MyTrait for MyStruct1 {
     }
 }
 
-type SerdeKey = u64;
-type DeFn = fn(value: Value) -> Box<dyn DeTrait>;
-type NameToDe = HashMap<SerdeKey, DeFn>;
-
-lazy_static! {
-    static ref NAME_TO_DE: NameToDe = {
-        let mut map = NameToDe::new();
-        let (key, de) = MyStruct::de();
-        map.insert(key, de);
-        let (key, de) = MyStruct1::de();
-        map.insert(key, de);
-        map
-    };
+trait NameToDeTableTrait {
+    type DynType: ?Sized + DeTrait;
+    fn get_de(sized_type: &str) -> DeFn<Self::DynType>;
 }
+
+struct NameToDeTable<T: ?Sized + DeTrait>(PhantomData<T>);
+
+impl NameToDeTableTrait for NameToDeTable<dyn MyTrait> {
+    type DynType = dyn MyTrait;
+
+    fn get_de(sized_type: &str) -> fn(Value) -> SerdeBox<Self::DynType> {
+        lazy_static! {
+            static ref NAME_TO_DE: NameToDe<dyn MyTrait> = {
+                let mut map = NameToDe::new();
+                let (key, de) = MyStruct::de::<dyn MyTrait>();
+                map.insert(key, de);
+                let (key, de) = MyStruct1::de::<dyn MyTrait>();
+                map.insert(key, de);
+                map
+            };
+        }
+
+        *NAME_TO_DE.get(sized_type).unwrap()
+    }
+}
+
+type DeFn<T: ?Sized + DeTrait> = fn(value: Value) -> SerdeBox<T>;
+type NameToDe<T: ?Sized + DeTrait> = HashMap<&'static str, DeFn<T>>;
 
 #[derive(Debug)]
 struct SerdeBox<T: ?Sized>(Box<T>);
-
-impl<T: ?Sized> SerdeBox<T> {
-    fn new(value: Box<T>) -> Self {
-        Self(value)
-    }
-}
 
 impl<T: ?Sized + SerTrait> Serialize for SerdeBox<T> {
     fn serialize<S>(&self, serializer: S) -> Result<<S as Serializer>::Ok, <S as Serializer>::Error>
@@ -108,9 +103,8 @@ impl<T: ?Sized + SerTrait> Serialize for SerdeBox<T> {
         S: Serializer,
     {
         let mut tuple: <S as Serializer>::SerializeTuple = serializer.serialize_tuple(2)?;
-        let (type_name, value) = self.0.ser();
-        tuple.serialize_element(&type_name)?;
-        tuple.serialize_element(&value)?;
+        tuple.serialize_element(std::any::type_name::<T>())?;
+        tuple.serialize_element(&self.0.ser())?;
         tuple.end()
     }
 }
@@ -122,9 +116,14 @@ impl<'de, T: ?Sized + DeTrait> Deserialize<'de> for SerdeBox<T> {
     {
         use std::*;
 
-        struct Visitor;
-        impl<'de> serde::de::Visitor<'de> for Visitor {
-            type Value = Box<dyn DeTrait>;
+        struct Visitor<T>(PhantomData<T>);
+        impl<T> Visitor<T> {
+            fn new() -> Self {
+                Self(PhantomData::<T>)
+            }
+        }
+        impl<'de, T> serde::de::Visitor<'de> for Visitor<T> {
+            type Value = SerdeBox<T>;
             fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                 write!(formatter, "a MyTraitBox")
             }
@@ -133,7 +132,7 @@ impl<'de, T: ?Sized + DeTrait> Deserialize<'de> for SerdeBox<T> {
             where
                 A: serde::de::SeqAccess<'de>,
             {
-                let t0: SerdeKey = match seq.next_element()? {
+                let sized_type: String = match seq.next_element()? {
                     Some(value) => value,
                     None => return Err(serde::de::Error::invalid_length(0, &self)),
                 };
@@ -142,15 +141,15 @@ impl<'de, T: ?Sized + DeTrait> Deserialize<'de> for SerdeBox<T> {
                     None => return Err(serde::de::Error::invalid_length(1, &self)),
                 };
 
-                let de = NAME_TO_DE.get(&t0).unwrap();
+                let de = NameToDeTable::<T>::
+                    .get(std::any::type_name::<T>())
+                    .unwrap()
+                    .get(&sized_type)
+                    .unwrap();
                 Ok(de(t1))
             }
         }
-        deserializer.deserialize_tuple(2, Visitor).map(|obj| {
-            let any = Box::into_raw(obj);
-            let any = any as *mut T;
-            SerdeBox::new(Box::from_raw())
-        })
+        deserializer.deserialize_tuple(2, Visitor::new())
     }
 }
 
