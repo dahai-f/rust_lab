@@ -22,6 +22,14 @@ impl Value for dyn MyTrait {
     }
 }
 
+trait MyTrait2: MyTrait {}
+
+impl Value for dyn MyTrait2 {
+    fn get() -> i32 {
+        4
+    }
+}
+
 struct MyStruct;
 
 impl MyTrait for MyStruct {}
@@ -30,5 +38,6 @@ fn main() {
     println!("{}", i32::get());
     println!("{}", u32::get());
     println!("{}", <dyn MyTrait>::get());
+    println!("{}", <dyn MyTrait2>::get());
     // println!("{}", MyStruct::get());
 }
