@@ -11,7 +11,7 @@ impl Value for i32 {
 
 impl Value for u32 {
     fn get_mut() -> &'static mut i32 {
-        static mut V: i32 = 0;
+        static mut V: i32 = 10;
         unsafe { &mut V }
     }
 }
@@ -20,7 +20,7 @@ trait MyTrait {}
 
 impl Value for dyn MyTrait {
     fn get_mut() -> &'static mut i32 {
-        static mut V: i32 = 0;
+        static mut V: i32 = 20;
         unsafe { &mut V }
     }
 }
@@ -29,7 +29,7 @@ trait MyTrait2: MyTrait {}
 
 impl Value for dyn MyTrait2 {
     fn get_mut() -> &'static mut i32 {
-        static mut V: i32 = 0;
+        static mut V: i32 = 30;
         unsafe { &mut V }
     }
 }
