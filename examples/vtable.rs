@@ -29,7 +29,6 @@ fn main() {
 
     let t = Box::new(MyStruct2) as Box<dyn MyTrait1>;
     let t = &*t as *const dyn MyTrait1;
-    VTable
     let trait_object: metatype::TraitObject = type_coerce(metatype::Type::meta(t));
     println!("{}", trait_object.vtable as *const _ as usize);
     let t = Box::new(MyStruct2) as Box<dyn MyTrait1>;
