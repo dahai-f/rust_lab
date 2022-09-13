@@ -14,3 +14,4 @@ build_id = "0.2.1"
 
 [dev-dependencies]
 metatype = "0.2"
+soa_derive = "0.12"
