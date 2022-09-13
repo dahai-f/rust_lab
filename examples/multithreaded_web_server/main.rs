@@ -23,11 +23,13 @@ fn main() {
 
 fn handle_connection(mut stream: TcpStream) {
     let mut buffer = [0; 1024];
-    stream.read(&mut buffer).unwrap();
 
     let get = b"GET / HTTP/1.1\r\n";
     let sleep = b"GET /sleep HTTP/1.1\r\n";
 
+    stream
+        .read_exact(&mut buffer[0..get.len().max(sleep.len())])
+        .unwrap();
     let (status_line, filename) = if buffer.starts_with(get) {
         ("HTTP/1.1 200 OK\r\n\r\n", "resources/hello.html")
     } else if buffer.starts_with(sleep) {

@@ -1,5 +1,3 @@
-use std::ops::Index;
-
 fn main() {
     let mut s = String::from("hello");
 
@@ -10,7 +8,7 @@ fn main() {
     // println!("{}, {}, and {}", r1, r2, r3);
 
     let mut v = vec![10, 9, 8];
-    let first = &v[9];// v.get(9);
+    let first = &v[9]; // v.get(9);
     for i in 0..10 {
         // v.push(i);
     }

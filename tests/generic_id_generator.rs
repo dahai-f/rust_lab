@@ -1,9 +1,3 @@
-#![feature(once_cell)]
-
-use std::lazy::{SyncLazy, SyncOnceCell};
-use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::{Condvar, Mutex};
-
 static mut NEXT: usize = 0;
 
 fn generic_id<T>() -> usize {

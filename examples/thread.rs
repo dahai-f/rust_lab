@@ -1,6 +1,5 @@
 #![feature(negative_impls)]
 
-use std::sync::{Arc, Mutex, RwLock};
 use std::thread;
 use std::time::Duration;
 
@@ -20,7 +19,7 @@ struct S<'v> {
 static VALUE: Value = Value { value: 100 };
 
 fn main() {
-    let mut s = S {
+    let s = S {
         value: Value { value: 10 },
         ref_value: &VALUE,
     };

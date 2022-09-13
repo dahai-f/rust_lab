@@ -1,6 +1,5 @@
-use std::any::Any;
-
 use metatype::type_coerce;
+use std::any::Any;
 
 trait MyTrait1: Any {
     fn fun(&self) {}
