@@ -1,9 +1,7 @@
-use std::fmt::Debug;
-use std::marker::PhantomData;
-
 use serde::ser::SerializeTuple;
 use serde::*;
 use serde_json::Value;
+use std::fmt::Debug;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct MyStruct {
@@ -115,9 +113,9 @@ fn main() {
 
     let serialized = serde_json::to_string(&message).unwrap();
     println!("{}", serialized);
-    std::fs::write("./resources/message.json", serialized).unwrap();
+    std::fs::write("./resources/message.json", &serialized).unwrap();
     // let message = std::fs::read("./resources/message.json").unwrap();
-    let deserialized: Message = serde_json::from_str(&serialized.unwrap()).unwrap();
+    let deserialized: Message = serde_json::from_str(&serialized).unwrap();
     println!("{:?}", deserialized);
     // MyStruct { foo: "abc", bar: 123 }
 }
