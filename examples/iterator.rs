@@ -90,7 +90,11 @@ fn main() {
     better_print_all(items);
 
     // 3. Better and better
-    fn better_better_print_all<D: Debug>(items_to_print: impl IntoIterator<Item = D>) {
+    fn better_better_print_all<D, T>(items_to_print: T)
+    where
+        D: Debug,
+        T: IntoIterator<Item = D>,
+    {
         for x in items_to_print {
             println!("{:?}", x);
         }
