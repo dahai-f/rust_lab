@@ -2,10 +2,10 @@ use serde::{Deserialize, Serialize};
 use soa_derive::{soa_zip, StructOfArray};
 
 #[derive(StructOfArray)]
-#[soa_derive(Serialize, Deserialize, Clone)]
-pub(crate) struct RigidBody {
-    pub position: i32,
-    pub orientation: i32,
+#[soa_derive(Serialize, Deserialize)]
+struct RigidBody {
+    position: i32,
+    orientation: i32,
 }
 
 fn main() {
